@@ -1,0 +1,18 @@
+{
+  "name": "plotting",
+  "version": "1.0.0",
+  "description": "",
+  "main": "test-print.js",
+  "scripts": {
+    "start": "parcel ./src/index.html",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "d3": "^5.9.2",
+    "@material-ui/core": "^3.9.2",
+    "@material-ui/icons": "^3.0.2"
+  }
+}
