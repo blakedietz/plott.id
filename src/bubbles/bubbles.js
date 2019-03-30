@@ -14,19 +14,26 @@ function wiggle(range, point) {
 }
 
 function randomScale(point) {
-    return Math.sqrt(point^2 / (Math.PI + (Math.random() * point)));
+    return Math.sqrt(point ^ 2 / (Math.PI + (Math.random() * point)));
 }
 
-export const render = ({START = 1, END = 50, WIDTH = 960, HEIGHT = 500 } = {}) => {
-
+export const render = (
+    {
+        START = 1,
+        END = 50,
+        WIDTH = 960,
+        HEIGHT = 500,
+        SELECTOR = "#bubbles"
+    } = {}
+) => {
     const margin = .03 * WIDTH;
 
     const range = d3.range(START, END, 1);
     // Create the cartesian product to fill the grid uniformly
     const points = d3.cross(range, range);
 
-    const svg = d3.select("body").append("svg")
-        .attr("width", WIDTH )
+    const svg = d3.select(SELECTOR)
+        .attr("width", WIDTH)
         .attr("height", HEIGHT);
 
     const xScale = d3.scaleLinear()
@@ -35,12 +42,20 @@ export const render = ({START = 1, END = 50, WIDTH = 960, HEIGHT = 500 } = {}) =
 
     const yScale = d3.scaleLinear()
         .domain([START, END])
-        .range([ HEIGHT - margin, 0 + margin]);
+        .range([HEIGHT - margin, 0 + margin]);
 
-    svg.selectAll("circle")
-        .data(points)
+    // Join data
+    const bubbles = svg.selectAll("circle")
+        .data(points);
+
+    // Remove elements
+    bubbles.exit().remove();
+
+    // Add and update elements
+    bubbles
         .enter()
         .append("circle")
+        .merge(bubbles)
         .attr("cx", ([x, y]) => {
             return xScale(wiggle(range, x));
         })
@@ -51,5 +66,5 @@ export const render = ({START = 1, END = 50, WIDTH = 960, HEIGHT = 500 } = {}) =
             return 3 + ((y * Math.random()) * .50);
         })
         .style("stroke", "black")
-        .style("fill", "none");
+        .style("fill", "none")
 };
