@@ -4,15 +4,25 @@
   "description": "",
   "main": "test-print.js",
   "scripts": {
-    "start": "parcel ./src/index.html",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "next",
+    "build": "next build",
+    "start": "next start"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "d3": "^5.9.2",
     "@material-ui/core": "^3.9.2",
-    "@material-ui/icons": "^3.0.2"
+    "@material-ui/icons": "^3.0.2",
+    "@material-ui/lab": "^3.0.0-alpha.30",
+    "classnames": "^2.2.6",
+    "d3": "^5.9.2",
+    "jss": "latest",
+    "next": "latest",
+    "prop-types": "latest",
+    "react": "^16.8.5",
+    "react-dom": "^16.8.5",
+    "react-jss": "^8.1.0",
+    "redux-actions": "^2.6.5"
   }
 }
