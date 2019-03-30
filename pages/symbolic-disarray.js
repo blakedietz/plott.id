@@ -20,6 +20,7 @@ import classNames from 'classnames';
 import {render} from "../src/symbolic-disarray/symbolic-dissarray"
 import {saveSVG} from "../src/save-svg";
 import {withStyles} from '@material-ui/core/styles';
+import * as d3 from "d3";
 
 const styles = theme => ({
     root: {
@@ -71,7 +72,12 @@ const styles = theme => ({
 
 const initialState = {
     visParams: {
-        maxNumberOfSquares: 50
+        maxNumberOfSquares: 5,
+        sideLength: 100,
+        translateX: 0,
+        translateY: 0,
+        rotate: 0
+
     },
     uiState: {
         drawerOpen: false,
@@ -79,7 +85,7 @@ const initialState = {
         margin: .03,
         speedDialOpen: false,
         width: 960,
-        sideLength: 10
+        sideLength: 150
     },
 };
 
@@ -106,6 +112,114 @@ const reducer = (state, {type, payload}) => {
     }
 };
 
+const Visualization = (props) => {
+    const {
+        maxNumberOfSquares = 50,
+        height = 960,
+        start = 1,
+        width = 500,
+        margin = .03,
+        sideLength = 150,
+        spacingX = 10,
+        spacingY = 10,
+        translateX = 0,
+        translateY = 0,
+        rotate=0
+    } = props;
+
+    /*
+     * References:
+     * - http://www.tobiastoft.com/posts/an-intro-to-pen-plotters
+     * - https://github.com/blakedietz/SymbolicDisarray/blob/master/SymbolicDisarray.pde
+     * -
+     * This code was cribbed from the above source.
+     */
+
+    function getRandomArbitrary(min, max) {
+        return Math.random() * (max - min) + min;
+    }
+
+    const range = d3.range(start, maxNumberOfSquares, 1);
+    // Create the cartesian product to fill the grid uniformly
+    const points = d3.cross(range, range);
+
+    const xScale = d3.scaleLinear()
+        .domain([start, maxNumberOfSquares])
+        .range([0 + margin, width - margin]);
+
+    const yScale = d3.scaleLinear()
+        .domain([start, maxNumberOfSquares])
+        .range([0 + margin, height - margin]);
+
+    const rectangles = points.map(([column, row]) => {
+        const φ = row > 2
+            ? getRandomArbitrary(-column, column)
+            : 0;
+
+        return (
+                <rect
+                    key={`${column}-${row}`}
+                    x={xScale(column)}
+                    y={yScale(row)}
+                    // transform={`rotate(${φ}, ${xScale(row)}, ${yScale(column)})`}
+                    width={sideLength}
+                    height={sideLength}
+                    fill="none"
+                    stroke="black"
+                ></rect>
+        );
+
+    });
+    return (
+        <svg
+            id="symbolic-disarray"
+            height={height}
+            width={width}
+        >
+            {
+                points.map(([column, row]) => {
+                    const φ = row > 2
+                        ? getRandomArbitrary(-column, column)
+                        : 0;
+
+                    return (
+                        <rect
+                            key={`${column}-${row}`}
+                            x={xScale(column) - sideLength/2}
+                            y={yScale(row) - sideLength/2}
+                            // transform={`rotate(${rotate}) translate(${translateX}, ${translateY})`}
+                            transform={`rotate(${rotate}, ${xScale(column)}, ${yScale(row)})`}
+                            width={sideLength}
+                            height={sideLength}
+                            fill="none"
+                            stroke="black"
+                        ></rect>
+                    );
+                })
+            }
+            {
+                points.map(([column, row]) => {
+                    const φ = row > 2
+                        ? getRandomArbitrary(-column, column)
+                        : 0;
+
+                    return (
+                        <circle
+                            key={`${column}-${row}`}
+                            cx={xScale(column)}
+                            cy={yScale(row)}
+                            r={1}
+                            fill="red"
+                            stroke="red"
+                        ></circle>
+                    );
+                })
+            }
+
+        </svg>
+    );
+};
+
 const actions = [
     {
         icon: <SaveIcon/>, name: 'Save', onClick: () => {
@@ -128,20 +242,13 @@ const SymbolicDisarray = ({classes}) => {
             visParams: {
                 maxNumberOfSquares,
                 sideLength,
+                translateX,
+                translateY,
+                rotate
             }
         },
         dispatch
     ] = useReducer(reducer, initialState);
-
-    useEffect(() => {
-        render({maxNumberOfSquares, width, height, sideLength, margin});
-    }, [
-        height,
-        margin,
-        maxNumberOfSquares,
-        sideLength,
-        width,
-    ]);
 
     const speedDialClassName = classNames(
         classes.speedDial,
@@ -182,15 +289,15 @@ const SymbolicDisarray = ({classes}) => {
                 open={drawerOpen}
                 ModalProps={{BackdropProps: {invisible: true}}}
                 onClose={() => {
-                dispatch(ACTION_CREATORS.setUiState({drawerOpen: false}));
-            }}>
+                    dispatch(ACTION_CREATORS.setUiState({drawerOpen: false}));
+                }}>
                 <div className={classes.fullList}>
                     <List>
                         <ListItem>
                             <div className={classes.sliderRoot}>
-                                <Typography id="num-circles">Number of squares: {maxNumberOfSquares}</Typography>
+                                <Typography id="num-squares">Number of squares: {maxNumberOfSquares}</Typography>
                                 <Slider
-                                    aria-labelledby="num-circles"
+                                    aria-labelledby="num-squares"
                                     classes={{container: classes.slider}}
                                     max={50}
                                     min={1}
@@ -212,9 +319,9 @@ const SymbolicDisarray = ({classes}) => {
                                     step={1}
                                     value={width}
                                 />
-                                <Typography id="width">Height: {height}</Typography>
+                                <Typography id="hegiht">Height: {height}</Typography>
                                 <Slider
-                                    aria-labelledby="width"
+                                    aria-labelledby="height"
                                     classes={{container: classes.slider}}
                                     max={1080}
                                     min={1}
@@ -224,9 +331,9 @@ const SymbolicDisarray = ({classes}) => {
                                     step={1}
                                     value={height}
                                 />
-                                <Typography id="width">Margin: {margin}</Typography>
+                                <Typography id="margin">Margin: {margin}</Typography>
                                 <Slider
-                                    aria-labelledby="width"
+                                    aria-labelledby="margin"
                                     classes={{container: classes.slider}}
                                     max={1080}
                                     min={0}
@@ -246,6 +353,39 @@ const SymbolicDisarray = ({classes}) => {
                                     }}
                                     value={sideLength}
                                 />
+                                <Typography id="translateX">Translate X: {translateX}</Typography>
+                                <Slider
+                                    aria-labelledby="translateX"
+                                    classes={{container: classes.slider}}
+                                    max={1080}
+                                    min={-1080}
+                                    onChange={(event, value) => {
+                                        dispatch(ACTION_CREATORS.setvisParams({translateX: value}));
+                                    }}
+                                    value={translateX}
+                                />
+                                <Typography id="translateY">Translate Y: {translateY}</Typography>
+                                <Slider
+                                    aria-labelledby="sideLength"
+                                    classes={{container: classes.slider}}
+                                    max={1080}
+                                    min={-1080}
+                                    onChange={(event, value) => {
+                                        dispatch(ACTION_CREATORS.setvisParams({translateY: value}));
+                                    }}
+                                    value={translateY}
+                                />
+                                <Typography id="rotate">Rotate: {rotate}</Typography>
+                                <Slider
+                                    aria-labelledby="rotate"
+                                    classes={{container: classes.slider}}
+                                    max={1080}
+                                    min={-1080}
+                                    onChange={(event, value) => {
+                                        dispatch(ACTION_CREATORS.setvisParams({rotate: value}));
+                                    }}
+                                    value={rotate}
+                                />
                             </div>
                         </ListItem>
                     </List>
@@ -254,7 +394,9 @@ const SymbolicDisarray = ({classes}) => {
             <Grid className={classes.grid} container>
                 <Grid item xs={12}>
                     <Paper className={classes.paper}>
-                        <svg width={width} height={height} id="symbolic-disarray"></svg>
+                        <Visualization
+                            {...{maxNumberOfSquares, height, width, margin, sideLength,translateY, translateX, rotate}}
+                        />
                     </Paper>
                 </Grid>
             </Grid>

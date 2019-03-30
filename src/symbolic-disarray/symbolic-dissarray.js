@@ -50,7 +50,7 @@ export const render = (
         .domain([start, maxNumberOfSquares])
         .range([0 + margin, height - margin]);
 
-    const rects = svg.selectAll("rect")
+    const rects = svg.selectAll("g")
         .data(points);
 
     rects.exit().remove();
