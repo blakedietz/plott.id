@@ -117,24 +117,7 @@ const reducer = (state, {type, payload}) => {
  * This code was cribbed from the above source.
  */
 
-function getRandomArbitrary(min, max) {
-    return Math.random() * (max - min) + min;
-}
-
-function createVisData(numberOfColumns, numberOfRows) {
-    const rows = d3.range(1, numberOfRows, 1);
-    const columns = d3.range(1, numberOfColumns, 1);
-    // Create the cartesian product to fill the grid uniformly
-    const points = d3.cross(columns, rows);
-
-
-    return points.map(([column, row]) => {
-        const φ = row > 2
-            ? getRandomArbitrary(-row, row)
-            : 0;
-
-        return [column, row, φ];
-    });
+function createVisData() {
 };
 
 const Visualization = (props) => {
@@ -156,78 +139,12 @@ const Visualization = (props) => {
         classes
     } = props;
 
-    const internalMargin = margin + (sideLength * 4);
-
-    const xScale = d3.scaleLinear()
-        .domain([start, numberOfColumns])
-        .range([0 + internalMargin, width - internalMargin]);
-
-    const yScale = d3.scaleLinear()
-        .domain([start, numberOfRows])
-        .range([0 + internalMargin, height - internalMargin]);
-
-    const fontXScale = d3.scaleLinear()
-        .domain([start, numberOfColumns])
-        .range([0, width]);
-
-    const FontYScale = d3.scaleLinear()
-        .domain([start, numberOfRows])
-        .range([0, height]);
-
     return (
         <svg
             id="symbolic-disarray"
             height={height}
             width={width}
         >
-            {
-                points.map(([column, row, φ]) => {
-                    const centerX = xScale(column);
-                    const centerY = yScale(row);
-
-                    const squareCenterX = centerX - (sideLength / 2);
-                    const squareCenterY = centerY - (sideLength / 2);
-
-                    return (
-                        <rect
-                            key={`${column}-${row}`}
-                            x={squareCenterX + φ}
-                            y={squareCenterY + φ}
-                            transform={`rotate(${φ}, ${centerX}, ${centerY})`}
-                            width={sideLength}
-                            height={sideLength}
-                            fill="none"
-                            stroke="black"
-                        ></rect>
-                    );
-                })
-            }
-            {
-                debugMode &&
-                points.map(([column, row]) => {
-                    const φ = row > 2
-                        ? getRandomArbitrary(-column, column)
-                        : 0;
-
-                    return (
-                        <circle
-                            key={`${column}-${row}`}
-                            cx={xScale(column)}
-                            cy={yScale(row)}
-                            r={1}
-                            fill="red"
-                            stroke="red"
-                        ></circle>
-                    );
-                })
-            }
-            <text
-                className={classes.svgFont}
-                x={xScale(0)}
-                y={yScale(numberOfRows) + 200}
-            >
-                Symbolic Disarray
-            </text>
         </svg>
     );
 };
@@ -254,10 +171,6 @@ const SymbolicDisarray = ({classes}) => {
         },
         dispatch
     ] = useReducer(reducer, initialState);
-
-    const setnumberOfColumns = (value) => {
-        dispatch(ACTION_CREATORS.setvisParams({numberOfColumns: Number(value)}));
-    };
 
     return (
         <div className={classes.root}>
