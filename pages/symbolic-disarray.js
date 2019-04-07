@@ -12,7 +12,7 @@ import PropTypes from 'prop-types';
 import React, {useEffect, useReducer} from 'react';
 import Slider from '@material-ui/lab/Slider';
 import Typography from '@material-ui/core/Typography';
-import {saveSVG} from "../src/save-svg";
+import {saveSVG} from "../src/utilities/save-svg";
 import {withStyles} from '@material-ui/core/styles';
 import * as d3 from "d3";
 import Button from '@material-ui/core/Button';
