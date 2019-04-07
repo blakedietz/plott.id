@@ -1,4 +1,4 @@
-export interface IPixelToSquiggleParams {
+export interface IPixelToSquiggleAlgorithmParams {
     amplitude: number,
     black: boolean,
     brightness: number,
@@ -13,7 +13,7 @@ export interface IPixelToSquiggleParams {
     width: number,
 }
 
-export const convertPixelsToSquiggles = (visParams: IPixelToSquiggleParams) => {
+export const convertPixelsToSquiggles = (visParams: IPixelToSquiggleAlgorithmParams) => {
     const {
         amplitude,
         black,

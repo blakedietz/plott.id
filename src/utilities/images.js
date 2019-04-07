@@ -1,5 +1,6 @@
-export const convertImageToCanvasBlob = (file, width = null, height = null) => {
-    const promise = new Promise((resolve, reject) => {
+export const convertImageToCanvasBlob = (file) => {
+    return new Promise((resolve, reject) => {
+
         /*
          * Note that the image and canvas tags are never shown on screen, they're only used to gather data about the
          * uploaded image.
@@ -23,8 +24,8 @@ export const convertImageToCanvasBlob = (file, width = null, height = null) => {
              * Set the canvas dimensions here before rendering. This is important otherwise if no dimensions are set, no
              * data will be available when calling getImageData.
              */
-            canvas.width = width || naturalWidth;
-            canvas.height = height || naturalHeight;
+            canvas.width = naturalWidth
+            canvas.height = naturalHeight
             // Add the image to the canvas
             context.drawImage(img, 0, 0);
             // Extract the data from the canvas

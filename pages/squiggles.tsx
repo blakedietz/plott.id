@@ -14,11 +14,12 @@ import Typography from '@material-ui/core/Typography';
 import {withStyles} from '@material-ui/core/styles';
 import Switch from '@material-ui/core/Switch';
 import TextField from '@material-ui/core/TextField';
-
+import Slider from '@material-ui/lab/Slider';
 import ComputePointsWorker from "../src/squiggles/compute-points.worker";
-import {Visualization} from "../src/squiggles/components";
-import {IPixelToSquiggleParams} from "../src/squiggles/algorithms/squiggile-visualization";
-import {SVGLine} from "../src/squiggles/components/svg-line";
+import Divider from "@material-ui/core/Divider";
+import {Visualization} from "../src/squiggles/components/index";
+import {IPixelToSquiggleAlgorithmParams} from "../src/squiggles/algorithms/pixels-to-squiggles";
+import {convertImageToCanvasBlob} from "../src/utilities/images";
 
 const styles = theme => ({
     button: {
@@ -70,9 +71,10 @@ interface ISquigglesState {
         imageUri: string,
         loadedImage: string,
         drawerOpen: boolean,
-        debugMode: boolean
+        debugMode: boolean,
+        scale: number
     },
-    visParams: IPixelToSquiggleParams,
+    algorithmParams: IPixelToSquiggleAlgorithmParams,
     squiggles: []
     webWorker: Object | null
 }
@@ -83,15 +85,16 @@ let initialState: ISquigglesState = {
         loadedImage: "",
         drawerOpen: false,
         debugMode: false,
+        scale: 100,
     },
-    visParams: {
+    algorithmParams: {
         amplitude: 1,
-        black: true,
+        black: false,
         brightness: 0,
         contrast: 0,
         frequency: 150,
         height: 0,
-        lineCount: 500,
+        lineCount: 50,
         maxBrightness: 255,
         minBrightness: 0,
         pixels: [],
@@ -99,27 +102,32 @@ let initialState: ISquigglesState = {
         width: 0,
     },
     squiggles: [],
+    fileBlob: Object | null,
     webWorker: null
 };
 
 const ACTION_TYPES = {
-    SET_VIS_PARAMS: "SET_VIS_PARAMS",
+    SET_ALGORITHM_PARAMS: "SET_ALGORITHM_PARAMS",
+    SET_SQUIGGLES: "SET_SQUIGGLES",
     SET_UI_STATE: "SET_UI_STATE",
+    SET_VIS_PARAMS: "SET_VIS_PARAMS",
     SET_WEB_WORKER: "SET_WEB_WORKER",
-    SET_SQUIGGLES: "SET_SQUIGGLES"
+    SET_FILE_BLOB: "SET_FILE_BLOB"
 };
 
 const ACTION_CREATORS = {
-    setvisParams: (params) => ({type: ACTION_TYPES.SET_VIS_PARAMS, payload: params}),
+    setAlgorithmParams: (params) => ({type: ACTION_TYPES.SET_ALGORITHM_PARAMS, payload: params}),
+    setSquiggles: (squiggles) => ({type: ACTION_TYPES.SET_SQUIGGLES, payload: {squiggles}}),
     setUiState: (params) => ({type: ACTION_TYPES.SET_UI_STATE, payload: params}),
     setWebWorker: (webWorker) => ({type: ACTION_TYPES.SET_WEB_WORKER, payload: {webWorker}}),
-    setSquiggles: (squiggles) => ({type: ACTION_TYPES.SET_SQUIGGLES, payload: {squiggles}}),
+    setFileBlob: (fileBlob) => ({type: ACTION_TYPES.SET_FILE_BLOB, payload: {fileBlob}}),
+    setvisParams: (params) => ({type: ACTION_TYPES.SET_VIS_PARAMS, payload: params}),
 };
 
 const reducer = (state, {type, payload}) => {
     switch (type) {
-        case ACTION_TYPES.SET_VIS_PARAMS:
-            return {...state, visParams: {...state.visParams, ...payload}};
+        case ACTION_TYPES.SET_ALGORITHM_PARAMS:
+            return {...state, algorithmParams: {...state.algorithmParams, ...payload}};
             break;
         case ACTION_TYPES.SET_UI_STATE:
             return {...state, uiState: {...state.uiState, ...payload}};
@@ -129,6 +137,9 @@ const reducer = (state, {type, payload}) => {
             break;
         case ACTION_TYPES.SET_SQUIGGLES:
             return {...state, squiggles: payload.squiggles};
+            break;
+        case ACTION_TYPES.SET_FILE_BLOB:
+            return {...state, fileBlob: payload.fileBlob};
             break;
         default:
             return {...initialState};
@@ -146,10 +157,11 @@ const Squiggles = ({classes}) => {
             drawerOpen,
             debugMode,
             imageUri,
+            scale,
             loadedImage,
         },
-        visParams: {
-            ampltude,
+        algorithmParams: {
+            amplitude,
             black,
             brightness,
             contrast,
@@ -157,15 +169,17 @@ const Squiggles = ({classes}) => {
             height,
             lineCount,
             maxBrightness,
-            minBrightNess,
+            minBrightness,
             pixels,
-            width,
+            spacing,
+            width
         },
+        fileBlob,
         squiggles,
         webWorker,
     } = state;
 
-    const {visParams, uiState} = state;
+    const {algorithmParams, uiState} = state;
 
     useEffect(() => {
         const worker = new ComputePointsWorker();
@@ -183,9 +197,23 @@ const Squiggles = ({classes}) => {
 
     useEffect(() => {
         if (webWorker) {
-            webWorker.postMessage({...visParams})
+            webWorker.postMessage({...algorithmParams})
         }
-    }, [pixels]);
+    }, [algorithmParams]);
+
+    useEffect(() => {
+        if (fileBlob) {
+            convertImageToCanvasBlob(fileBlob,)
+                .then(({pixelData, width, height}) => {
+                    dispatch(ACTION_CREATORS.setAlgorithmParams({
+                        pixels: pixelData,
+                        width,
+                        height
+                    }));
+                });
+        }
+
+    }, [fileBlob]);
 
     return (
         <div className={classes.root}>
@@ -200,8 +228,21 @@ const Squiggles = ({classes}) => {
                     <EditIcon></EditIcon>
                 </IconButton>
             </AppBar>
+            <Grid className={classes.grid} container>
+                <Grid item xs={12}>
+                    <Paper className={classes.paper}>
+                        <Visualization
+                            black={black}
+                            height={height}
+                            width={width}
+                            strokeWidth={2}
+                            squiggles={squiggles}/>
+                    </Paper>
+                </Grid>
+            </Grid>
             <Drawer
                 anchor="right"
+                variant="permanent"
                 open={drawerOpen}
                 ModalProps={{BackdropProps: {invisible: true}}}
                 onClose={() => {
@@ -210,9 +251,7 @@ const Squiggles = ({classes}) => {
                 <div className={classes.fullList}>
                     <List>
                         <ListItem>
-                            <div className={classes.sliderRoot}>
-                                <Typography variant="h6">Parameters</Typography>
-                            </div>
+                            <Typography variant="h6">Load an Image</Typography>
                         </ListItem>
                         <ListItem>
                             <TextField
@@ -222,35 +261,141 @@ const Squiggles = ({classes}) => {
                                 onChange={(element) => {
                                     const [file, other] = element.target.files;
 
-
-                                    const canvas = document.createElement("canvas");
-                                    const context = canvas.getContext('2d');
-
-                                    const img = new Image();
-                                    img.addEventListener('load', ({target: {naturalWidth, naturalHeight}}) => {
-                                        canvas.width = naturalWidth;
-                                        canvas.height = naturalHeight;
-                                        context.drawImage(img, 0, 0);
-                                        const pixelData = context.getImageData(0, 0, naturalWidth, naturalHeight);
-                                        dispatch(ACTION_CREATORS.setvisParams({
-                                            pixels: pixelData,
-                                            width: naturalWidth,
-                                            height: naturalHeight
-                                        }));
-                                    });
-
-                                    const reader = new FileReader();
-
-                                    reader.addEventListener('load', () => {
-                                        dispatch(ACTION_CREATORS.setUiState({loadedImage: reader.result}));
-                                        img.src = reader.result;
-                                    });
-                                    reader.readAsDataURL(file);
-
                                     dispatch(ACTION_CREATORS.setUiState({imageUri: element.target.value}));
+                                    dispatch(ACTION_CREATORS.setFileBlob(file));
                                 }}
                                 value={imageUri}
                             />
+                        </ListItem>
+                        <ListItem>
+                            <div className={classes.dividerRoot}>
+                                <Divider className={classes.divider}/>
+                                <Typography variant="h6">Image options</Typography>
+                            </div>
+                        </ListItem>
+                        <ListItem>
+                            <Typography id="brightness">Brightness: {brightness}</Typography>
+                            <Slider
+                                aria-labelledby="brightness"
+                                classes={{container: classes.slider}}
+                                max={100}
+                                min={-100}
+                                onChange={(event, value) => {
+                                    dispatch(ACTION_CREATORS.setAlgorithmParams({brightness: value}));
+                                }}
+                                step={1}
+                                value={brightness}
+                            />
+                        </ListItem>
+                        <ListItem>
+                            <Typography id="contrast">Contrast: {contrast}</Typography>
+                            <Slider
+                                aria-labelledby="contrast"
+                                classes={{container: classes.slider}}
+                                max={100}
+                                min={-100}
+                                onChange={(event, value) => {
+                                    dispatch(ACTION_CREATORS.setAlgorithmParams({contrast: value}));
+                                }}
+                                step={1}
+                                value={contrast}
+                            />
+                        </ListItem>
+                        <ListItem>
+                            <Typography id="min-brightness">Min Brigthness: {minBrightness}</Typography>
+                            <Slider
+                                aria-labelledby="contrast"
+                                classes={{container: classes.slider}}
+                                min={255}
+                                min={0}
+                                onChange={(event, value) => {
+                                    dispatch(ACTION_CREATORS.setAlgorithmParams({minBrightness: value}));
+                                }}
+                                step={1}
+                                value={minBrightness}
+                            />
+                        </ListItem>
+                        <ListItem>
+                            <Typography id="max-brightness">Max Brigthness: {maxBrightness}</Typography>
+                            <Slider
+                                aria-labelledby="contrast"
+                                classes={{container: classes.slider}}
+                                max={255}
+                                min={0}
+                                onChange={(event, value) => {
+                                    dispatch(ACTION_CREATORS.setAlgorithmParams({maxBrightness: value}));
+                                }}
+                                step={1}
+                                value={maxBrightness}
+                            />
+                        </ListItem>
+                        <ListItem>
+                            <div className={classes.dividerRoot}>
+                                <Divider className={classes.divider}/>
+                                <Typography variant="h6">Squiggle parameters</Typography>
+                            </div>
+                        </ListItem>
+                        <ListItem>
+                            <Typography id="lineCount">Line Count: {lineCount}</Typography>
+                            <Slider
+                                aria-labelledby="lineCount"
+                                classes={{container: classes.slider}}
+                                max={200}
+                                min={10}
+                                onChange={(event, value) => {
+                                    dispatch(ACTION_CREATORS.setAlgorithmParams({lineCount: value}));
+                                }}
+                                step={1}
+                                value={lineCount}
+                            />
+                        </ListItem>
+                        <ListItem>
+                            <Typography id="frequency">Frequency: {frequency}</Typography>
+                            <Slider
+                                aria-labelledby="frequency"
+                                classes={{container: classes.slider}}
+                                max={256}
+                                min={5}
+                                onChange={(event, value) => {
+                                    dispatch(ACTION_CREATORS.setAlgorithmParams({frequency: value}));
+                                }}
+                                step={1}
+                                value={frequency}
+                            />
+                        </ListItem>
+                        <ListItem>
+                            <Typography id="amplitude">Amplitude: {amplitude}</Typography>
+                            <Slider
+                                aria-labelledby="amplitude"
+                                classes={{container: classes.slider}}
+                                max={5}
+                                min={.1}
+                                onChange={(event, value) => {
+                                    dispatch(ACTION_CREATORS.setAlgorithmParams({amplitude: value}));
+                                }}
+                                step={.1}
+                                value={amplitude}
+                            />
+                        </ListItem>
+                        <ListItem>
+                            <Typography id="spacing">Spacing: {spacing}</Typography>
+                            <Slider
+                                aria-labelledby="spacing"
+                                classes={{container: classes.slider}}
+                                max={2.9}
+                                min={.5}
+                                onChange={(event, value) => {
+                                    dispatch(ACTION_CREATORS.setAlgorithmParams({spacing: value}));
+                                }}
+                                step={.1}
+                                value={spacing}
+                            />
+                        </ListItem>
+                        <ListItem>
+                            <div className={classes.dividerRoot}>
+                                <Divider className={classes.divider}/>
+                                <Typography variant="h6">Debug</Typography>
+                            </div>
                         </ListItem>
                         <ListItem>
                             <Typography id="debug">Debug mode</Typography>
@@ -265,25 +410,6 @@ const Squiggles = ({classes}) => {
                     </List>
                 </div>
             </Drawer>
-            <Grid className={classes.grid} container>
-                <Grid item xs={12}>
-                    <Paper className={classes.paper}>
-                        {/*<img src={loadedImage}/>*/}
-                        <svg width={width} height={height}>
-                            {squiggles.map((points, index) => <SVGLine key={index} points={points}/>)}
-                        </svg>
-                        {/*<Visualization*/}
-                        {/*{...{*/}
-                        {/*debugMode,*/}
-                        {/*height,*/}
-                        {/*pixels,*/}
-                        {/*width,*/}
-                        {/*classes*/}
-                        {/*}}*/}
-                        {/*/>*/}
-                    </Paper>
-                </Grid>
-            </Grid>
         </div>
     );
 };

@@ -87,7 +87,7 @@ let initialState = {
 initialState.visParams.points = createVisData(initialState.visParams.numberOfColumns, initialState.visParams.numberOfRows);
 
 const ACTION_TYPES = {
-    SET_VIS_PARAMS: "SET_VIS_PARAMS",
+    SET_ALGORITHM_PARAMS: "SET_ALGORITHM_PARAMS",
     SET_UI_STATE: "SET_UI_STATE",
 };
 
@@ -274,6 +274,7 @@ const SymbolicDisarray = ({classes}) => {
             </AppBar>
             <Drawer
                 anchor="right"
+                variant="permanent"
                 open={drawerOpen}
                 ModalProps={{BackdropProps: {invisible: true}}}
                 onClose={() => {

@@ -80,7 +80,7 @@ const initialState = {
 };
 
 const ACTION_TYPES = {
-    SET_VIS_PARAMS: "SET_BUBBLE_PARAMS",
+    SET_ALGORITHM_PARAMS: "SET_BUBBLE_PARAMS",
     SET_UI_STATE: "SET_UI_STATE",
 };
 

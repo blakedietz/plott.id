@@ -1,4 +1,4 @@
-const SVGLine = ({points}) => {
+const SVGLine = ({points, ...other}) => {
     const path = points.reduce((path, point, index) => {
         if (index === 0) {
             path += `M ${point[0]},${point[1]}`;
@@ -9,7 +9,7 @@ const SVGLine = ({points}) => {
         return path;
     }, "");
 
-return (<path d={path} fill="black" stroke="rgb(0,0,0)" strokeWidth="2px"/>);
+return (<path d={path} {...other}/>);
 
 };
 export {SVGLine};

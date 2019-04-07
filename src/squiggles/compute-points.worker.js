@@ -1,4 +1,4 @@
-import {convertPixelsToSquiggles} from "./algorithms/squiggile-visualization";
+import {convertPixelsToSquiggles} from "./algorithms/pixels-to-squiggles";
 
 self.addEventListener('message', (event) => {
     console.log('Worker received:', event.data);
