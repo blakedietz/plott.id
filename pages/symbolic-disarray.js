@@ -10,18 +10,19 @@ import ListItem from '@material-ui/core/ListItem';
 import Paper from '@material-ui/core/Paper';
 import PropTypes from 'prop-types';
 import React, {useEffect, useReducer} from 'react';
-import SaveIcon from '@material-ui/icons/Save';
 import Slider from '@material-ui/lab/Slider';
-import SpeedDial from '@material-ui/lab/SpeedDial';
-import SpeedDialAction from '@material-ui/lab/SpeedDialAction';
-import SpeedDialIcon from '@material-ui/lab/SpeedDialIcon';
 import Typography from '@material-ui/core/Typography';
-import classNames from 'classnames';
-import {render} from "../src/symbolic-disarray/symbolic-dissarray"
-import {saveSVG} from "../src/save-svg";
+import {saveSVG} from "../src/utilities/save-svg";
 import {withStyles} from '@material-ui/core/styles';
+import * as d3 from "d3";
+import Button from '@material-ui/core/Button';
+import Divider from '@material-ui/core/Divider';
+import Switch from '@material-ui/core/Switch';
 
 const styles = theme => ({
+    button: {
+        margin: theme.spacing.unit,
+    },
     root: {
         display: 'flex',
         flexDirection: 'column',
@@ -52,39 +53,41 @@ const styles = theme => ({
     slider: {
         padding: '22px 0px',
     },
-
-    speedDialWrapper: {
-        height: 380,
-        top: 30,
-        right: 30,
-        position: 'fixed',
+    dividerRoot: {
+        width: 300,
     },
-    speedDial: {
-        position: 'absolute',
-        '&$directionUp': {
-            bottom: theme.spacing.unit * 2,
-            right: theme.spacing.unit * 3,
-        }
+    divider: {
+        marginBottom: theme.spacing.unit * 2,
     },
-    directionUp: {},
+    svgFont: {
+        font: "bold 20px serif"
+    }
 });
 
-const initialState = {
+let initialState = {
     visParams: {
-        maxNumberOfSquares: 50
+        height: 2900,
+        margin: .03,
+        numberOfColumns: 13,
+        numberOfRows: 22,
+        points: [],
+        rotate: 0,
+        sideLength: 100,
+        start: 1,
+        translateX: 0,
+        translateY: 0,
+        width: 2000,
     },
     uiState: {
         drawerOpen: false,
-        height: 500,
-        margin: .03,
-        speedDialOpen: false,
-        width: 960,
-        sideLength: 10
+        debugMode: false,
     },
 };
 
+initialState.visParams.points = createVisData(initialState.visParams.numberOfColumns, initialState.visParams.numberOfRows);
+
 const ACTION_TYPES = {
-    SET_VIS_PARAMS: "SET_VIS_PARAMS",
+    SET_ALGORITHM_PARAMS: "SET_ALGORITHM_PARAMS",
     SET_UI_STATE: "SET_UI_STATE",
 };
 
@@ -106,62 +109,154 @@ const reducer = (state, {type, payload}) => {
     }
 };
 
-const actions = [
-    {
-        icon: <SaveIcon/>, name: 'Save', onClick: () => {
-            saveSVG('#symbolic-disarray', 'symbolic-disarray')
-        }
-    },
-];
+/*
+ * References:
+ * - http://www.tobiastoft.com/posts/an-intro-to-pen-plotters
+ * - https://github.com/blakedietz/SymbolicDisarray/blob/master/SymbolicDisarray.pde
+ * -
+ * This code was cribbed from the above source.
+ */
+
+function getRandomArbitrary(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
+function createVisData(numberOfColumns, numberOfRows) {
+    const rows = d3.range(1, numberOfRows, 1);
+    const columns = d3.range(1, numberOfColumns, 1);
+    // Create the cartesian product to fill the grid uniformly
+    const points = d3.cross(columns, rows);
+
+
+    return points.map(([column, row]) => {
+        const φ = row > 2
+            ? getRandomArbitrary(-row, row)
+            : 0;
+
+        return [column, row, φ];
+    });
+};
+
+const Visualization = (props) => {
+    const {
+        debugMode = false,
+        points,
+        numberOfColumns = 13,
+        numberOfRows = 22,
+        height = 2900,
+        start = 1,
+        width = 2000,
+        margin = .03,
+        sideLength = 150,
+        spacingX = 10,
+        spacingY = 10,
+        translateX = 0,
+        translateY = 0,
+        rotate = 0,
+        classes
+    } = props;
+
+    const internalMargin = margin + (sideLength * 4);
+
+    const xScale = d3.scaleLinear()
+        .domain([start, numberOfColumns])
+        .range([0 + internalMargin, width - internalMargin]);
+
+    const yScale = d3.scaleLinear()
+        .domain([start, numberOfRows])
+        .range([0 + internalMargin, height - internalMargin]);
+
+    const fontXScale = d3.scaleLinear()
+        .domain([start, numberOfColumns])
+        .range([0, width]);
+
+    const FontYScale = d3.scaleLinear()
+        .domain([start, numberOfRows])
+        .range([0, height]);
+
+    return (
+        <svg
+            id="symbolic-disarray"
+            height={height}
+            width={width}
+        >
+            {
+                points.map(([column, row, φ]) => {
+                    const centerX = xScale(column);
+                    const centerY = yScale(row);
+
+                    const squareCenterX = centerX - (sideLength / 2);
+                    const squareCenterY = centerY - (sideLength / 2);
+
+                    return (
+                        <rect
+                            key={`${column}-${row}`}
+                            x={squareCenterX + φ}
+                            y={squareCenterY + φ}
+                            transform={`rotate(${φ}, ${centerX}, ${centerY})`}
+                            width={sideLength}
+                            height={sideLength}
+                            fill="none"
+                            stroke="black"
+                        ></rect>
+                    );
+                })
+            }
+            {
+                debugMode &&
+                points.map(([column, row]) => {
+                    const φ = row > 2
+                        ? getRandomArbitrary(-column, column)
+                        : 0;
+
+                    return (
+                        <circle
+                            key={`${column}-${row}`}
+                            cx={xScale(column)}
+                            cy={yScale(row)}
+                            r={1}
+                            fill="red"
+                            stroke="red"
+                        ></circle>
+                    );
+                })
+            }
+            <text
+                className={classes.svgFont}
+                x={xScale(0)}
+                y={yScale(numberOfRows) + 200}
+            >
+                Symbolic Disarray
+            </text>
+        </svg>
+    );
+};
 
 const SymbolicDisarray = ({classes}) => {
     const [
-
         {
             uiState: {
                 drawerOpen,
-                height,
-                margin,
-                speedDialOpen,
-                width,
+                debugMode,
             },
             visParams: {
-                maxNumberOfSquares,
+                height,
+                margin,
+                numberOfColumns,
+                numberOfRows,
+                points,
+                rotate,
                 sideLength,
+                translateX,
+                translateY,
+                width,
             }
         },
         dispatch
     ] = useReducer(reducer, initialState);
 
-    useEffect(() => {
-        render({maxNumberOfSquares, width, height, sideLength, margin});
-    }, [
-        height,
-        margin,
-        maxNumberOfSquares,
-        sideLength,
-        width,
-    ]);
-
-    const speedDialClassName = classNames(
-        classes.speedDial,
-        classes[`directionUp`],
-    );
-
-    const handleXorDial = () => {
-        dispatch(ACTION_CREATORS.setUiState({speedDialOpen: !speedDialOpen}))
-    };
-
-    const handleOpenDial = () => {
-        dispatch(ACTION_CREATORS.setUiState({speedDialOpen: true}))
-    };
-
-    const handleCloseDial = () => {
-        dispatch(ACTION_CREATORS.setUiState({speedDialOpen: false}))
-    };
-
-    const setmaxNumberOfSquares = (value) => {
-        dispatch(ACTION_CREATORS.setvisParams({maxNumberOfSquares: Number(value)}));
+    const setnumberOfColumns = (value) => {
+        dispatch(ACTION_CREATORS.setvisParams({numberOfColumns: Number(value)}));
     };
 
     return (
@@ -179,62 +274,107 @@ const SymbolicDisarray = ({classes}) => {
             </AppBar>
             <Drawer
                 anchor="right"
+                variant="permanent"
                 open={drawerOpen}
                 ModalProps={{BackdropProps: {invisible: true}}}
                 onClose={() => {
-                dispatch(ACTION_CREATORS.setUiState({drawerOpen: false}));
-            }}>
+                    dispatch(ACTION_CREATORS.setUiState({drawerOpen: false}));
+                }}>
                 <div className={classes.fullList}>
                     <List>
                         <ListItem>
                             <div className={classes.sliderRoot}>
-                                <Typography id="num-circles">Number of squares: {maxNumberOfSquares}</Typography>
+                                <Typography variant="h6">Parameters</Typography>
+                            </div>
+                        </ListItem>
+                        <ListItem>
+                            <div className={classes.sliderRoot}>
+                                <Typography id="num-columns">Number of columns: {numberOfColumns}</Typography>
                                 <Slider
-                                    aria-labelledby="num-circles"
+                                    aria-labelledby="num-columns"
                                     classes={{container: classes.slider}}
                                     max={50}
                                     min={1}
                                     onChange={(event, value) => {
-                                        setmaxNumberOfSquares(value)
+                                        dispatch(ACTION_CREATORS.setvisParams({
+                                            numberOfColumns: value,
+                                            points: createVisData(value, numberOfRows)
+                                        }));
                                     }}
                                     step={1}
-                                    value={maxNumberOfSquares}
+                                    value={numberOfColumns}
                                 />
+                            </div>
+                        </ListItem>
+                        <ListItem>
+                            <div className={classes.sliderRoot}>
+                                <Typography id="num-rows">Number of rows: {numberOfRows}</Typography>
+                                <Slider
+                                    aria-labelledby="num-rows"
+                                    classes={{container: classes.slider}}
+                                    max={50}
+                                    min={1}
+                                    onChange={(event, value) => {
+                                        dispatch(ACTION_CREATORS.setvisParams({
+                                            numberOfRows: value,
+                                            points: createVisData(numberOfColumns, value)
+                                        }));
+                                    }}
+                                    step={1}
+                                    value={numberOfRows}
+                                />
+
+                            </div>
+                        </ListItem>
+                        <ListItem>
+                            <div className={classes.sliderRoot}>
                                 <Typography id="width">Width: {width}</Typography>
                                 <Slider
                                     aria-labelledby="width"
                                     classes={{container: classes.slider}}
-                                    max={1920}
+                                    max={10000}
                                     min={1}
                                     onChange={(event, value) => {
-                                        dispatch(ACTION_CREATORS.setUiState({width: value}));
+                                        dispatch(ACTION_CREATORS.setvisParams({width: value}));
                                     }}
                                     step={1}
                                     value={width}
                                 />
-                                <Typography id="width">Height: {height}</Typography>
+                            </div>
+                        </ListItem>
+                        <ListItem>
+                            <div className={classes.sliderRoot}>
+                                <Typography id="hegiht">Height: {height}</Typography>
                                 <Slider
-                                    aria-labelledby="width"
+                                    aria-labelledby="height"
                                     classes={{container: classes.slider}}
-                                    max={1080}
+                                    max={10000}
                                     min={1}
                                     onChange={(event, value) => {
-                                        dispatch(ACTION_CREATORS.setUiState({height: value}));
+                                        dispatch(ACTION_CREATORS.setvisParams({height: value}));
                                     }}
                                     step={1}
                                     value={height}
                                 />
-                                <Typography id="width">Margin: {margin}</Typography>
+                            </div>
+                        </ListItem>
+                        <ListItem>
+                            <div className={classes.sliderRoot}>
+                                <Typography id="margin">Margin: {margin}</Typography>
                                 <Slider
-                                    aria-labelledby="width"
+                                    aria-labelledby="margin"
                                     classes={{container: classes.slider}}
-                                    max={1080}
+                                    max={10000}
                                     min={0}
                                     onChange={(event, value) => {
-                                        dispatch(ACTION_CREATORS.setUiState({margin: value}));
+                                        dispatch(ACTION_CREATORS.setvisParams({margin: value}));
                                     }}
                                     value={margin}
                                 />
+                            </div>
+                        </ListItem>
+                        <ListItem>
+                            <div className={classes.sliderRoot}>
                                 <Typography id="sideLength">Side Length: {sideLength}</Typography>
                                 <Slider
                                     aria-labelledby="sideLength"
@@ -248,43 +388,60 @@ const SymbolicDisarray = ({classes}) => {
                                 />
                             </div>
                         </ListItem>
+                        <ListItem>
+                            <div className={classes.dividerRoot}>
+                                <Divider className={classes.divider}/>
+                                <Typography variant="h6">Other</Typography>
+                            </div>
+                        </ListItem>
+                        <ListItem>
+                            <Button variant="contained" color="primary" className={classes.button}
+                                    onClick={() => saveSVG('#symbolic-disarray', 'symbolic-disarray')}>
+                                Save as SVG
+                            </Button>
+                        </ListItem>
+                        <ListItem>
+                            <Button variant="contained" color="primary" className={classes.button} onClick={() => {
+                                dispatch(ACTION_CREATORS.setvisParams({points: createVisData(numberOfColumns, numberOfRows)}));
+                            }}>
+                                Regenerate
+                            </Button>
+                        </ListItem>
+                        <ListItem>
+                            <Typography id="debug">Debug mode</Typography>
+                            <Switch
+                                checked={debugMode}
+                                onChange={() => {
+                                    dispatch(ACTION_CREATORS.setUiState({debugMode: !debugMode}));
+                                }}
+                                color="primary"
+                            />
+                        </ListItem>
                     </List>
                 </div>
             </Drawer>
             <Grid className={classes.grid} container>
                 <Grid item xs={12}>
                     <Paper className={classes.paper}>
-                        <svg width={width} height={height} id="symbolic-disarray"></svg>
+                        <Visualization
+                            {...{
+                                debugMode,
+                                height,
+                                margin,
+                                numberOfColumns,
+                                numberOfRows,
+                                points,
+                                rotate,
+                                sideLength,
+                                translateX,
+                                translateY,
+                                width,
+                                classes
+                            }}
+                        />
                     </Paper>
                 </Grid>
             </Grid>
-            <SpeedDial
-                ariaLabel="Actions"
-                color="secondary"
-                className={speedDialClassName}
-                direction="up"
-                hidden={false}
-                icon={<SpeedDialIcon/>}
-                onBlur={handleCloseDial}
-                onClick={handleXorDial}
-                onClose={handleCloseDial}
-                onFocus={handleOpenDial}
-                onMouseEnter={handleOpenDial}
-                onMouseLeave={handleCloseDial}
-                open={speedDialOpen}
-            >
-                {actions.map(action => (
-                    <SpeedDialAction
-                        icon={action.icon}
-                        key={action.name}
-                        onClick={() => {
-                            handleCloseDial();
-                            action.onClick()
-                        }}
-                        tooltipTitle={action.name}
-                    />
-                ))}
-            </SpeedDial>
         </div>
     );
 };

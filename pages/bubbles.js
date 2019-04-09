@@ -18,7 +18,7 @@ import SpeedDialIcon from '@material-ui/lab/SpeedDialIcon';
 import Typography from '@material-ui/core/Typography';
 import classNames from 'classnames';
 import {render} from "../src/bubbles/bubbles"
-import {saveSVG} from "../src/save-svg";
+import {saveSVG} from "../src/utilities/save-svg";
 import {withStyles} from '@material-ui/core/styles';
 
 const styles = theme => ({
@@ -80,7 +80,7 @@ const initialState = {
 };
 
 const ACTION_TYPES = {
-    SET_VIS_PARAMS: "SET_BUBBLE_PARAMS",
+    SET_ALGORITHM_PARAMS: "SET_BUBBLE_PARAMS",
     SET_UI_STATE: "SET_UI_STATE",
 };
 
