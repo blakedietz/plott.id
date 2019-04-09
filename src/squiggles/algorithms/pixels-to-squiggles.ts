@@ -8,7 +8,7 @@ export interface IPixelToSquiggleAlgorithmParams {
     lineCount: number,
     maxBrightness: number
     minBrightness: number,
-    pixels: [number]|[],
+    pixels: [Object]|[],
     spacing: number,
     width: number,
 }

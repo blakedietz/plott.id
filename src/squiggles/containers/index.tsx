@@ -1,27 +1,25 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 
-import AppBar from "../src/components/appbar";
+import ComputePointsWorker from "../compute-points.worker";
+import Divider from "@material-ui/core/Divider";
 import Drawer from '@material-ui/core/Drawer';
 import EditIcon from '@material-ui/icons/Edit';
-import Grid from '@material-ui/core/Grid';
 import IconButton from '@material-ui/core/IconButton'
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
-import Paper from '@material-ui/core/Paper';
 import PropTypes from 'prop-types';
 import React, {useEffect, useReducer} from 'react';
-import Typography from '@material-ui/core/Typography';
-import {withStyles} from '@material-ui/core/styles';
+import Slider from '@material-ui/lab/Slider';
 import Switch from '@material-ui/core/Switch';
 import TextField from '@material-ui/core/TextField';
-import Slider from '@material-ui/lab/Slider';
-import ComputePointsWorker from "../src/squiggles/compute-points.worker";
-import Divider from "@material-ui/core/Divider";
-import {Visualization} from "../src/squiggles/components/index";
-import {IPixelToSquiggleAlgorithmParams} from "../src/squiggles/algorithms/pixels-to-squiggles";
-import {convertImageToCanvasBlob} from "../src/utilities/images";
+import Typography from '@material-ui/core/Typography';
+import {ACTION_CREATORS, initialState, reducer} from "../squiggles.store";
 import {Button} from "@material-ui/core";
-import {saveSVG} from "../src/utilities/save-svg";
+import {Visualization} from "../components";
+import {convertImageToCanvasBlob} from "../../utilities/images";
+import {saveSVG} from "../../utilities/save-svg";
+import {withStyles} from '@material-ui/core/styles';
+import AppContainer from "../../components/layout";
 
 const styles = theme => ({
     button: {
@@ -68,87 +66,7 @@ const styles = theme => ({
     }
 });
 
-interface ISquigglesState {
-    uiState: {
-        imageUri: string,
-        loadedImage: string,
-        drawerOpen: boolean,
-        debugMode: boolean,
-        scale: number
-    },
-    algorithmParams: IPixelToSquiggleAlgorithmParams,
-    squiggles: []
-    webWorker: Object | null
-}
-
-let initialState: ISquigglesState = {
-    uiState: {
-        imageUri: "",
-        loadedImage: "",
-        drawerOpen: false,
-        debugMode: false,
-        scale: 100,
-    },
-    algorithmParams: {
-        amplitude: 1,
-        black: false,
-        brightness: 0,
-        contrast: 0,
-        frequency: 150,
-        height: 0,
-        lineCount: 50,
-        maxBrightness: 255,
-        minBrightness: 0,
-        pixels: [],
-        spacing: 1,
-        width: 0,
-    },
-    squiggles: [],
-    fileBlob: Object | null,
-    webWorker: null
-};
-
-const ACTION_TYPES = {
-    SET_ALGORITHM_PARAMS: "SET_ALGORITHM_PARAMS",
-    SET_SQUIGGLES: "SET_SQUIGGLES",
-    SET_UI_STATE: "SET_UI_STATE",
-    SET_VIS_PARAMS: "SET_VIS_PARAMS",
-    SET_WEB_WORKER: "SET_WEB_WORKER",
-    SET_FILE_BLOB: "SET_FILE_BLOB"
-};
-
-const ACTION_CREATORS = {
-    setAlgorithmParams: (params) => ({type: ACTION_TYPES.SET_ALGORITHM_PARAMS, payload: params}),
-    setSquiggles: (squiggles) => ({type: ACTION_TYPES.SET_SQUIGGLES, payload: {squiggles}}),
-    setUiState: (params) => ({type: ACTION_TYPES.SET_UI_STATE, payload: params}),
-    setWebWorker: (webWorker) => ({type: ACTION_TYPES.SET_WEB_WORKER, payload: {webWorker}}),
-    setFileBlob: (fileBlob) => ({type: ACTION_TYPES.SET_FILE_BLOB, payload: {fileBlob}}),
-    setvisParams: (params) => ({type: ACTION_TYPES.SET_VIS_PARAMS, payload: params}),
-};
-
-const reducer = (state, {type, payload}) => {
-    switch (type) {
-        case ACTION_TYPES.SET_ALGORITHM_PARAMS:
-            return {...state, algorithmParams: {...state.algorithmParams, ...payload}};
-            break;
-        case ACTION_TYPES.SET_UI_STATE:
-            return {...state, uiState: {...state.uiState, ...payload}};
-            break;
-        case ACTION_TYPES.SET_WEB_WORKER:
-            return {...state, webWorker: payload.webWorker};
-            break;
-        case ACTION_TYPES.SET_SQUIGGLES:
-            return {...state, squiggles: payload.squiggles};
-            break;
-        case ACTION_TYPES.SET_FILE_BLOB:
-            return {...state, fileBlob: payload.fileBlob};
-            break;
-        default:
-            return {...initialState};
-    }
-};
-
-const Squiggles = ({classes}) => {
+const Index = ({classes}) => {
     const [
         state,
         dispatch
@@ -219,29 +137,27 @@ const Squiggles = ({classes}) => {
 
     return (
         <div className={classes.root}>
-            <AppBar>
-                <Typography variant="h6" color="inherit" className={classes.grow}>
-                    Pixels to Squiggles
-                </Typography>
-                <IconButton onClick={() => {
-                    dispatch(ACTION_CREATORS.setUiState({drawerOpen: true}));
-                }}
-                            color="inherit">
-                    <EditIcon></EditIcon>
-                </IconButton>
-            </AppBar>
-            <Grid className={classes.grid} container>
-                <Grid item xs={12}>
-                    <Paper className={classes.paper}>
-                        <Visualization
-                            black={black}
-                            height={height}
-                            width={width}
-                            strokeWidth={2}
-                            squiggles={squiggles}/>
-                    </Paper>
-                </Grid>
-            </Grid>
+            <AppContainer
+                title="Pixels to Squiggles"
+                appbarComponent={() => {
+                    return (
+                        <IconButton onClick={() => {
+                            dispatch(ACTION_CREATORS.setUiState({drawerOpen: true}));
+                        }}
+                                    color="inherit">
+                            <EditIcon></EditIcon>
+                        </IconButton>
+                    )
+                }
+                }
+            >
+                            <Visualization
+                                black={black}
+                                height={height}
+                                width={width}
+                                strokeWidth={2}
+                                squiggles={squiggles}/>
+            </AppContainer>
             <Drawer
                 anchor="right"
                 variant="permanent"
@@ -422,8 +338,8 @@ const Squiggles = ({classes}) => {
     );
 };
 
-Squiggles.propTypes = {
+Index.propTypes = {
     classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(Squiggles);
+export default withStyles(styles)(Index);
