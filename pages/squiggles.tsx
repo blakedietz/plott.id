@@ -20,6 +20,8 @@ import Divider from "@material-ui/core/Divider";
 import {Visualization} from "../src/squiggles/components/index";
 import {IPixelToSquiggleAlgorithmParams} from "../src/squiggles/algorithms/pixels-to-squiggles";
 import {convertImageToCanvasBlob} from "../src/utilities/images";
+import {Button} from "@material-ui/core";
+import {saveSVG} from "../src/utilities/save-svg";
 
 const styles = theme => ({
     button: {
@@ -266,6 +268,12 @@ const Squiggles = ({classes}) => {
                                 }}
                                 value={imageUri}
                             />
+                        </ListItem>
+                        <ListItem>
+                            <Button variant="contained" color="primary" className={classes.button}
+                                    onClick={() => saveSVG('#pixels-squiggles', 'pixels-squiggles')}>
+                                Save as SVG
+                            </Button>
                         </ListItem>
                         <ListItem>
                             <div className={classes.dividerRoot}>

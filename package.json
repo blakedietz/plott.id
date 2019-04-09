@@ -1,5 +1,5 @@
 {
-  "name": "plotting",
+  "name": "plotting.id",
   "version": "1.0.0",
   "description": "",
   "main": "test-print.js",
@@ -10,7 +10,7 @@
     "start": "next start"
   },
   "keywords": [],
-  "author": "",
+  "author": "blakedietz",
   "license": "ISC",
   "dependencies": {
     "@material-ui/core": "^3.9.2",
