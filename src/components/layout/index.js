@@ -53,7 +53,7 @@ let AppContainer = ({children, classes, title, appbarComponent = null}) => {
 AppContainer.propTypes = {
   classes: PropTypes.object.isRequired,
   title: PropTypes.string.isRequired,
-  appBarComponent: PropTypes.object.isRequired
+  appBarComponent: PropTypes.object
 };
 
 export default withStyles(styles)(AppContainer);
