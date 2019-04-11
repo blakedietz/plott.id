@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 
-import ComputePointsWorker from "../compute-points.worker";
+import ComputePointsWorker from "./compute-points.worker";
 import Divider from "@material-ui/core/Divider";
 import Drawer from '@material-ui/core/Drawer';
 import EditIcon from '@material-ui/icons/Edit';
@@ -13,13 +13,13 @@ import Slider from '@material-ui/lab/Slider';
 import Switch from '@material-ui/core/Switch';
 import TextField from '@material-ui/core/TextField';
 import Typography from '@material-ui/core/Typography';
-import {ACTION_CREATORS, initialState, reducer} from "../squiggles.store";
+import {ACTION_CREATORS, initialState, reducer} from "./squiggles.store";
 import {Button} from "@material-ui/core";
-import {Visualization} from "../components";
-import {convertImageToCanvasBlob} from "../../utilities/convert-image-to-pixels";
-import {saveSVG} from "../../utilities/save-svg";
+import {Visualization} from "./components";
+import {convertImageToCanvasBlob} from "../utilities/convert-image-to-pixels";
+import {saveSVG} from "../utilities/save-svg";
 import {withStyles} from '@material-ui/core/styles';
-import AppContainer from "../../components/layout";
+import AppContainer from "../components/layout/index";
 
 const styles = theme => ({
     button: {

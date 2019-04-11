@@ -1,1 +1,1 @@
-export { default }  from "../src/squiggles/containers";
+export { default }  from "../src/squiggles";
