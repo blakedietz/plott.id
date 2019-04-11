@@ -61,8 +61,16 @@ const styles = theme => ({
     divider: {
         marginBottom: theme.spacing.unit * 2,
     },
-    svgFont: {
-        font: "bold 20px serif"
+
+    emptyView: {
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: "center",
+        minHeight: "100vh"
+    },
+    emptyViewText: {
+        maxWidth: "50%"
     }
 });
 
@@ -135,6 +143,24 @@ const Index = ({classes}) => {
 
     }, [fileBlob]);
 
+    const Content = () => (squiggles.length)
+        ? (
+            <div className={classes.emptyView}>
+                <Visualization
+                    className={classes.emptyViewText}
+                    black={black}
+                    height={height}
+                    width={width}
+                    strokeWidth={2}
+                    squiggles={squiggles}/>
+            </div>
+        )
+        : (<div className={classes.emptyView}>
+            <Typography className={classes.emptyViewText} variant="h2">
+                Load an image
+            </Typography>
+        </div>)
+
     return (
         <div className={classes.root}>
             <AppContainer
@@ -151,12 +177,7 @@ const Index = ({classes}) => {
                 }
                 }
             >
-                            <Visualization
-                                black={black}
-                                height={height}
-                                width={width}
-                                strokeWidth={2}
-                                squiggles={squiggles}/>
+                <Content/>
             </AppContainer>
             <Drawer
                 anchor="right"
