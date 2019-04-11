@@ -1,6 +1,5 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 
-import AppBar from "../src/components/appbar";
 import Drawer from '@material-ui/core/Drawer';
 import EditIcon from '@material-ui/icons/Edit';
 import Grid from '@material-ui/core/Grid';
@@ -9,7 +8,7 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import Paper from '@material-ui/core/Paper';
 import PropTypes from 'prop-types';
-import React, {useEffect, useReducer} from 'react';
+import React, {useReducer} from 'react';
 import Slider from '@material-ui/lab/Slider';
 import Typography from '@material-ui/core/Typography';
 import {saveSVG} from "../src/utilities/save-svg";
@@ -18,6 +17,7 @@ import * as d3 from "d3";
 import Button from '@material-ui/core/Button';
 import Divider from '@material-ui/core/Divider';
 import Switch from '@material-ui/core/Switch';
+import AppContainer from "../src/components/layout";
 
 const styles = theme => ({
     button: {
@@ -261,25 +261,30 @@ const SymbolicDisarray = ({classes}) => {
 
     return (
         <div className={classes.root}>
-            <AppBar>
-                <Typography variant="h6" color="inherit" className={classes.grow}>
-                    Symbolic Disarray
-                </Typography>
-                <IconButton onClick={() => {
-                    dispatch(ACTION_CREATORS.setUiState({drawerOpen: true}));
-                }}
-                            color="inherit">
-                    <EditIcon></EditIcon>
-                </IconButton>
-            </AppBar>
+            <AppContainer
+                title="Symbolic Disarray"
+            >
+                <Visualization
+                    {...{
+                        debugMode,
+                        height,
+                        margin,
+                        numberOfColumns,
+                        numberOfRows,
+                        points,
+                        rotate,
+                        sideLength,
+                        translateX,
+                        translateY,
+                        width,
+                        classes
+                    }}
+                />
+            </AppContainer>
             <Drawer
                 anchor="right"
                 variant="permanent"
-                open={drawerOpen}
-                ModalProps={{BackdropProps: {invisible: true}}}
-                onClose={() => {
-                    dispatch(ACTION_CREATORS.setUiState({drawerOpen: false}));
-                }}>
+            >
                 <div className={classes.fullList}>
                     <List>
                         <ListItem>
@@ -420,28 +425,6 @@ const SymbolicDisarray = ({classes}) => {
                     </List>
                 </div>
             </Drawer>
-            <Grid className={classes.grid} container>
-                <Grid item xs={12}>
-                    <Paper className={classes.paper}>
-                        <Visualization
-                            {...{
-                                debugMode,
-                                height,
-                                margin,
-                                numberOfColumns,
-                                numberOfRows,
-                                points,
-                                rotate,
-                                sideLength,
-                                translateX,
-                                translateY,
-                                width,
-                                classes
-                            }}
-                        />
-                    </Paper>
-                </Grid>
-            </Grid>
         </div>
     );
 };
