@@ -1,4 +1,4 @@
-class Noise {
+class PerlinNoise {
     static lerp(t, a, b) {
         return a + t * (b - a);
     }
@@ -29,17 +29,17 @@ class Noise {
         const fy = (3 - 2 * y) * y * y;
         const p0 = this.p[X] + Y;
         const p1 = this.p[X + 1] + Y;
-        return Noise.lerp(
+        return PerlinNoise.lerp(
             fy,
-            Noise.lerp(
+            PerlinNoise.lerp(
                 fx,
-                Noise.grad2d(this.p[p0], x, y),
-                Noise.grad2d(this.p[p1], x - 1, y)
+                PerlinNoise.grad2d(this.p[p0], x, y),
+                PerlinNoise.grad2d(this.p[p1], x - 1, y)
             ),
-            Noise.lerp(
+            PerlinNoise.lerp(
                 fx,
-                Noise.grad2d(this.p[p0 + 1], x, y - 1),
-                Noise.grad2d(this.p[p1 + 1], x - 1, y - 1)
+                PerlinNoise.grad2d(this.p[p0 + 1], x, y - 1),
+                PerlinNoise.grad2d(this.p[p1 + 1], x - 1, y - 1)
             )
         );
     }
@@ -57,4 +57,4 @@ class Noise {
     }
 }
 
-export {Noise};
+export {PerlinNoise};

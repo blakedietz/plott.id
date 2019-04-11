@@ -1,4 +1,4 @@
-import {Noise} from "./noise";
+import {PerlinNoise} from "./perlin-noise";
 
 /**
  * Takend directly from https://observablehq.com/@mbostock/oriented Modified slightly for usage with svg.
@@ -9,7 +9,7 @@ import {Noise} from "./noise";
  * @returns {Array}
  */
 export const orientedAlgorithm = (count, width, height) => {
-    const perlin = new Noise(3);
+    const perlin = new PerlinNoise(3);
     const particles = new Map();
     const lines = [];
 
