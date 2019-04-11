@@ -23,6 +23,8 @@ export let initialState: IOrientedState = {
         portrait: true
     },
     algorithmParams: {
+        octaves: 3,
+        count: 720
     },
 };
 const ACTION_TYPES = {

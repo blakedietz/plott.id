@@ -19,6 +19,7 @@ import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import Typography from "@material-ui/core/Typography"
 import Switch from "@material-ui/core/Switch"
+import TextField from '@material-ui/core/TextField';
 
 const styles = theme => ({
     button: {
@@ -29,10 +30,6 @@ const styles = theme => ({
         flexDirection: 'column',
         minHeight: '100vh',
         textAlign: 'center',
-    },
-
-    fullList: {
-        width: 'auto',
     },
     formControl: {
         margin: theme.spacing.unit,
@@ -60,8 +57,12 @@ const Index = ({classes}) => {
             height,
             portrait
         },
-        algorithmParams: {},
+        algorithmParams: {
+            count,
+            octaves
+        },
     } = state;
+
 
     return (
         <div className={classes.root}>
@@ -80,7 +81,7 @@ const Index = ({classes}) => {
                             points={points}
                             strokeWidth="1px"
                             stroke="black"
-                        ></SVGLine>)
+                        />)
                     }
                 </svg>
             </AppContainer>
@@ -99,7 +100,7 @@ const Index = ({classes}) => {
                     <ListItem>
                         <Button variant="contained" color="primary" className={classes.button}
                                 onClick={() => {
-                                    const results = orientedAlgorithm(100, width, height);
+                                    const results = orientedAlgorithm(count, width, height);
                                     dispatch(ACTION_CREATORS.setvisParams({lines: results}));
                                 }}>
                             Run
@@ -113,7 +114,8 @@ const Index = ({classes}) => {
                                     value={paperSize}
                                     onChange={({target: {value}}) => {
                                         const {width, height} = portrait ? PAPER_SIZES.get(value) : PAPER_SIZES.get(value).landscape();
-                                        dispatch(ACTION_CREATORS.setUiState({paperSize: value, width, height}))
+                                        dispatch(ACTION_CREATORS.setUiState({paperSize: value, width, height}));
+                                        dispatch(ACTION_CREATORS.setvisParams({lines: []}));
                                     }}
                                     inputProps={{
                                         name: 'paper-size',
@@ -128,12 +130,50 @@ const Index = ({classes}) => {
                         </form>
                     </ListItem>
                     <ListItem>
+                        <form autoComplete="off">
+                            <TextField
+                                id="outlined-octaves"
+                                type="number"
+                                step="1"
+                                min="1"
+                                max="100"
+                                label="Octaves"
+                                value={octaves}
+                                onChange={(event) => {
+                                    dispatch(ACTION_CREATORS.setAlgorithmParams({octaves: Number(event.target.value)}));
+                                }}
+                                margin="normal"
+                                variant="outlined"
+                            />
+                        </form>
+                    </ListItem>
+                    <ListItem>
+                        <form autoComplete="off">
+                            <TextField
+                                id="outlined-particle-count"
+                                type="number"
+                                step="1"
+                                min="1"
+                                max="10000"
+                                label="ParticleCount"
+                                value={count}
+                                onChange={(event) => {
+                                    dispatch(ACTION_CREATORS.setAlgorithmParams({count: Number(event.target.value)}));
+                                }}
+                                margin="normal"
+                                variant="outlined"
+                            />
+                        </form>
+                    </ListItem>
+                    <ListItem>
                         <Typography id="portrait">Portrait</Typography>
                         <Switch
                             checked={portrait}
                             onChange={() => {
-                                const {width, height} = !portrait ?  PAPER_SIZES.get(paperSize).landscape() : PAPER_SIZES.get(paperSize) ;
-                                dispatch(ACTION_CREATORS.setUiState({portrait: !portrait, width, height}));
+                                const nextPortraitValue = !portrait;
+                                const {width, height} = nextPortraitValue ? PAPER_SIZES.get(paperSize) : PAPER_SIZES.get(paperSize).landscape();
+                                dispatch(ACTION_CREATORS.setUiState({portrait: nextPortraitValue, width, height}));
+                                dispatch(ACTION_CREATORS.setvisParams({lines: []}));
                             }}
                             color="primary"
                         />
