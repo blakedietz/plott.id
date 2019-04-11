@@ -81,14 +81,6 @@ const reducer = (state, {type, payload}) => {
     }
 };
 
-const actions = [
-    {
-        icon: <SaveIcon/>, name: 'Save', onClick: () => {
-            saveSVG('#bubbles', 'bubbles')
-        }
-    },
-];
-
 const Bubbles = ({classes}) => {
     const [
 
