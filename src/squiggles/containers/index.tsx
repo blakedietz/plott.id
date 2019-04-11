@@ -16,7 +16,7 @@ import Typography from '@material-ui/core/Typography';
 import {ACTION_CREATORS, initialState, reducer} from "../squiggles.store";
 import {Button} from "@material-ui/core";
 import {Visualization} from "../components";
-import {convertImageToCanvasBlob} from "../../utilities/images";
+import {convertImageToCanvasBlob} from "../../utilities/convert-image-to-pixels";
 import {saveSVG} from "../../utilities/save-svg";
 import {withStyles} from '@material-ui/core/styles';
 import AppContainer from "../../components/layout";
