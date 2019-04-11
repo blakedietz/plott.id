@@ -1,11 +1,11 @@
-import AppBar from "@material-ui/core/AppBar";
-import Grid from "@material-ui/core/Grid";
-import Paper from "@material-ui/core/Paper";
-import PropTypes from "prop-types";
-import React from "react";
+import AppBar from '@material-ui/core/AppBar';
+import Grid from '@material-ui/core/Grid';
+import Paper from '@material-ui/core/Paper';
+import PropTypes from 'prop-types';
+import React from 'react';
 import Toolbar from '@material-ui/core/Toolbar';
-import Typography from "@material-ui/core/Typography";
-import {withStyles} from "@material-ui/core/styles";
+import Typography from '@material-ui/core/Typography';
+import { withStyles } from '@material-ui/core/styles';
 
 const styles = theme => ({
   root: {
@@ -16,7 +16,7 @@ const styles = theme => ({
   },
   // For the appbar
   grow: {
-    flexGrow: 1
+    flexGrow: 1,
   },
   paper: {
     color: theme.palette.text.secondary,
@@ -24,11 +24,11 @@ const styles = theme => ({
     textAlign: 'center',
   },
   grid: {
-    padding: theme.spacing.unit * 2
+    padding: theme.spacing.unit * 2,
   },
 });
 
-let AppContainer = ({children, classes, title, appbarComponent = null}) => {
+let AppContainer = ({ children, classes, title, appbarComponent = null }) => {
   return (
     <div className={classes.root}>
       <AppBar>
@@ -41,9 +41,7 @@ let AppContainer = ({children, classes, title, appbarComponent = null}) => {
       </AppBar>
       <Grid className={classes.grid} container>
         <Grid item xs={12}>
-          <Paper className={classes.paper}>
-            {children}
-          </Paper>
+          <Paper className={classes.paper}>{children}</Paper>
         </Grid>
       </Grid>
     </div>
@@ -53,7 +51,7 @@ let AppContainer = ({children, classes, title, appbarComponent = null}) => {
 AppContainer.propTypes = {
   classes: PropTypes.object.isRequired,
   title: PropTypes.string.isRequired,
-  appBarComponent: PropTypes.object
+  appBarComponent: PropTypes.object,
 };
 
 export default withStyles(styles)(AppContainer);
