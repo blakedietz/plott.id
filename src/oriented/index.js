@@ -20,6 +20,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Typography from '@material-ui/core/Typography';
 import Switch from '@material-ui/core/Switch';
 import TextField from '@material-ui/core/TextField';
+import ComputePerlinNoiseWorker from './compute-perlin-noise-points.worker';
 
 const styles = theme => ({
   button: {
@@ -45,9 +46,30 @@ const Index = ({ classes }) => {
 
   const {
     visParams: { lines },
-    uiState: { paperSize, width, height, portrait },
+    uiState: { shouldRun, paperSize, width, height, portrait },
     algorithmParams: { count, octaves },
+    webWorker,
   } = state;
+
+  useEffect(() => {
+    const worker = new ComputePerlinNoiseWorker();
+    dispatch(ACTION_CREATORS.setWebWorker(worker));
+    worker.addEventListener('message', ({ data }) => {
+      dispatch(ACTION_CREATORS.setUiState({ shouldRun: false }));
+      dispatch(ACTION_CREATORS.setvisParams({ lines: data.lines }));
+    });
+
+    return function cleanUp() {
+      worker.terminate();
+      dispatch(ACTION_CREATORS.setWebWorker(null));
+    };
+  }, []);
+
+  useEffect(() => {
+    if (webWorker && shouldRun) {
+      webWorker.postMessage({ count, width, height });
+    }
+  }, [shouldRun]);
 
   return (
     <div className={classes.root}>
@@ -82,8 +104,11 @@ const Index = ({ classes }) => {
               color="primary"
               className={classes.button}
               onClick={() => {
-                const results = orientedAlgorithm(count, width, height);
-                dispatch(ACTION_CREATORS.setvisParams({ lines: results }));
+                dispatch(
+                  ACTION_CREATORS.setUiState({
+                    shouldRun: true,
+                  }),
+                );
               }}
             >
               Run

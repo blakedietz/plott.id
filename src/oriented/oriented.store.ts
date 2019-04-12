@@ -15,6 +15,7 @@ interface IOrientedState {
     portrait: boolean;
   };
   algorithmParams: Object;
+  webWorker: Object|null;
 }
 export let initialState: IOrientedState = {
   visParams: {
@@ -30,23 +31,21 @@ export let initialState: IOrientedState = {
     octaves: 3,
     count: 720,
   },
+  webWorker: null
 };
-const ACTION_TYPES = {
-  SET_ALGORITHM_PARAMS: 'SET_ALGORITHM_PARAMS',
-  SET_SQUIGGLES: 'SET_SQUIGGLES',
-  SET_UI_STATE: 'SET_UI_STATE',
-  SET_VIS_PARAMS: 'SET_VIS_PARAMS',
+enum ACTION_TYPES {
+  SET_ALGORITHM_PARAMS = 'SET_ALGORITHM_PARAMS',
+  SET_UI_STATE = 'SET_UI_STATE',
+  SET_VIS_PARAMS = 'SET_VIS_PARAMS',
+  SET_WEB_WORKER = 'SET_WEB_WORKER',
 };
 export const ACTION_CREATORS = {
   setAlgorithmParams: params => ({
     type: ACTION_TYPES.SET_ALGORITHM_PARAMS,
     payload: params,
   }),
-  setSquiggles: squiggles => ({
-    type: ACTION_TYPES.SET_SQUIGGLES,
-    payload: { squiggles },
-  }),
   setUiState: params => ({ type: ACTION_TYPES.SET_UI_STATE, payload: params }),
+  setWebWorker: webWorker => ({ type: ACTION_TYPES.SET_WEB_WORKER, payload: {webWorker}}),
   setvisParams: params => ({
     type: ACTION_TYPES.SET_VIS_PARAMS,
     payload: params,
@@ -63,14 +62,11 @@ export const reducer = (state, { type, payload }) => {
     case ACTION_TYPES.SET_VIS_PARAMS:
       return { ...state, visParams: { ...state.visParams, ...payload } };
       break;
+    case ACTION_TYPES.SET_WEB_WORKER:
+      return { ...state, webWorker: payload.webWorker};
+      break;
     case ACTION_TYPES.SET_UI_STATE:
       return { ...state, uiState: { ...state.uiState, ...payload } };
-      break;
-    case ACTION_TYPES.SET_SQUIGGLES:
-      return { ...state, squiggles: payload.squiggles };
-      break;
-    case ACTION_TYPES.SET_FILE_BLOB:
-      return { ...state, fileBlob: payload.fileBlob };
       break;
     default:
       return { ...initialState };
