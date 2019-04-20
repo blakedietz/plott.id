@@ -1,8 +1,5 @@
 import * as d3 from 'd3';
-
-export function getRandomArbitrary(min, max) {
-  return Math.random() * (max - min) + min;
-}
+import {getRandomArbitrary} from "../../utilities/random";
 
 export function createVisData(numberOfColumns, numberOfRows) {
   const rows = d3.range(1, numberOfRows, 1);
