@@ -6,10 +6,10 @@ interface CellNeighbors {
 }
 
 class Cell implements CellNeighbors {
-    north : Cell;
-    south : Cell;
-    east : Cell;
-    west : Cell;
+    public north : Cell;
+    public south : Cell;
+    public east : Cell;
+    public west : Cell;
 
     private row: [];
     private column:[];
@@ -60,4 +60,8 @@ class Cell implements CellNeighbors {
 
         return neighbors;
     }
+}
+
+export {
+    Cell
 }
