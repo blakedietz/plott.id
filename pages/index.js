@@ -18,6 +18,11 @@ function Index(props) {
 
   return (
     <div className={classes.root}>
+        <Typography variant="h4" gutterBottom>
+            <Link href="/mazes">
+                <a>Mazes</a>
+            </Link>
+        </Typography>
       <Typography variant="h4" gutterBottom>
         <Link href="/oriented">
           <a>Oriented</a>

@@ -20,7 +20,6 @@ const convertCellToPoints = (xScale, yScale) => (cell: CellModel): ISquare => {
     return points;
 };
 const getPassages = (cell) => {
-    console.log(cell);
     const neighbors = [];
 
     if (cell.isLinkedToCell(cell.north)) {
@@ -64,6 +63,7 @@ const Maze = ({grid, width, height}: IMazeProps) => {
 
     return (
         <svg
+            id="mazes"
             width={width}
             height={height}
         >
