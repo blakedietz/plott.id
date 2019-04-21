@@ -12,7 +12,7 @@ import { saveSVG } from '../utilities/save-svg';
 import { withStyles } from '@material-ui/core/styles';
 import { ACTION_CREATORS, initialState, reducer } from './oriented.store';
 import { orientedAlgorithm } from './algorithms';
-import { SVGLine } from '../squiggles/components/svg-line';
+import { SVGLine } from '../components/svg-line';
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
 import Select from '@material-ui/core/Select';

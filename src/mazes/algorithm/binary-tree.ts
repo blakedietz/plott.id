@@ -4,7 +4,8 @@ import {sample} from "../../utilities/random";
 export function binaryTree(grid: Grid) {
     let neighbors;
     let neighbor;
-    for (let {north, east} of grid.getCells()) {
+    for (let cell of grid.getCells()) {
+        const {north, east} = cell;
         neighbors = [];
 
         if (north) {
