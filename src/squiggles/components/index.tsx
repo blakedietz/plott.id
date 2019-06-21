@@ -1,5 +1,5 @@
 import React from 'react';
-import { SVGLine } from './svg-line';
+import { SVGLine } from '../../components/svg-line';
 
 interface ISquiggleVisualizationProps {
   black: boolean;

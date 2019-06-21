@@ -13,6 +13,7 @@ const styles = theme => ({
     flexDirection: 'column',
     minHeight: '100vh',
     textAlign: 'center',
+    marginTop: "64px"
   },
   // For the appbar
   grow: {
