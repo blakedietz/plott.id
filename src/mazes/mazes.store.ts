@@ -1,14 +1,27 @@
 import {Grid} from "./grid";
 
+
 interface IMazeStoreState {
     rows: number,
     columns: number,
-    grid: Grid
+    grid: Grid,
+    algorithm: ALGORIGHTMS,
+    debug: IMazeDebugState
+};
+
+export interface IMazeDebugState {
+    displayDistancesFromRoot: boolean,
+    displaySolutionDistances: boolean,
 };
 
 enum MAZE_ACTION_TYPES {
     SET_MAZE_PARAMS = "SET_MAZE_PARAMS"
-};
+}
+
+export enum ALGORIGHTMS {
+    BINARY_TREE = "Binary tree",
+    SIDEWINDER = "Sidewinder"
+}
 
 interface IFSA {
     type: MAZE_ACTION_TYPES,
@@ -18,7 +31,12 @@ interface IFSA {
 export const initialState: IMazeStoreState = {
     rows: 40,
     columns: 40,
-    grid: (new Grid({rows: 40, columns: 40}))
+    grid: (new Grid({rows: 40, columns: 40})),
+    algorithm: ALGORIGHTMS.BINARY_TREE,
+    debug: {
+        displayDistancesFromRoot: false,
+        displaySolutionDistances: false
+    }
 };
 
 

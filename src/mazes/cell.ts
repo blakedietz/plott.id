@@ -1,3 +1,5 @@
+import {Distances} from "./distances";
+
 interface CellNeighbors {
     north?: Cell | null;
     south?: Cell | null;
@@ -42,7 +44,7 @@ class Cell implements CellNeighbors {
         }
     }
 
-    public links(): [Cell] {
+    public links(): Array<Cell> {
         return [...this.linkedCells.keys()];
     }
 
@@ -66,6 +68,79 @@ class Cell implements CellNeighbors {
         }
 
         return neighbors;
+    }
+
+    public distances() {
+        const distancesFromCell = new Distances(this);
+
+        let frontier: Array<Cell> = [this];
+
+        while (frontier.length) {
+            const newFrontier: Array<Cell> = [];
+
+            /*
+             *                    ┌────────────────────────────────────────────────┐
+             *                    │Your next frontier is all cells that are linked │
+             *                    │ cells that are in your current frontier        │
+             *                    └────────────────────────────────────────────────┘
+             *     ┌─────────────────────────────────┐     │
+             *     │  Assume this cell is the root.  │     │
+             *     │  Your current frontier is just  │     │
+             *     │       this cell on start.       │     │
+             *     └────────────────┬────────────────┘     │
+             *                      │                      │
+             *                      │                      │
+             *                      │                      │
+             *                      ▼                      ▼
+             *┌───┬───┬───┐       ┌───┬───┬───┐      ┌───┬───┬───┐
+             *│   │   │   │       │ 0 │   │   │      │ 0 │ n │   │
+             *├───┼───┼───┤       ├───┼───┼───┤      ├───┼───┼───┤
+             *│   │   │   │──────▶│   │   │   │─────▶│ n │   │   │
+             *├───┼───┼───┤       ├───┼───┼───┤      ├───┼───┼───┤
+             *│   │   │   │       │   │   │   │      │   │   │   │
+             *└───┴───┴───┘       └───┴───┴───┘      └───┴───┴───┘
+             */
+            for (const cell of frontier) {
+
+                for (const linkedCell of  cell.links()) {
+                    let cellDistance = distancesFromCell.getCellDistance(linkedCell);
+                    /*
+                     * At this point if the cell is not defined it hasn't been visited yet, so add it to the list of
+                     * distances and update the new distance to be the current frontier distance + 1.
+                     */
+                    if ( cellDistance === undefined) {
+                        // @ts-ignore
+                        distancesFromCell.addCellDistance(linkedCell, distancesFromCell.getCellDistance(cell) + 1);
+
+                        newFrontier.push(linkedCell);
+                    }
+                }
+            }
+            /*
+             * Now dispose of the old current frontier and make the new frontier the current frontier.
+             *                                                   ┌────────────────────────────┐
+             *                                                   │Now the new frontier becomes│
+             *                                                   │the current frontier and we │
+             *                                                   │create another new frontier │
+             *                                                   │to visit during the next    │
+             *                                                   │iteration of the loop.      │
+             *                                                   └────────────────────────────┘
+             *                                                                  │
+             *                                                                  │
+             *                                                                  │
+             *                                                                  ▼
+             *┌───┬───┬───┐       ┌───┬───┬───┐      ┌───┬───┬───┐        ┌───┬───┬───┐        ┌───┬───┬───┐
+             *│   │   │   │       │ x │   │   │      │ x │ n │   │        │ x │ c │   │        │ x │ c │ n │
+             *├───┼───┼───┤       ├───┼───┼───┤      ├───┼───┼───┤        ├───┼───┼───┤        ├───┼───┼───┤
+             *│   │   │   │──────▶│   │   │   │─────▶│ n │   │   │ ──────▶│ c │   │   │ ──────▶│ c │ n │   │
+             *├───┼───┼───┤       ├───┼───┼───┤      ├───┼───┼───┤        ├───┼───┼───┤        ├───┼───┼───┤
+             *│   │   │   │       │   │   │   │      │   │   │   │        │   │   │   │        │ n │   │   │
+             *└───┴───┴───┘       └───┴───┴───┘      └───┴───┴───┘        └───┴───┴───┘        └───┴───┴───┘
+             */
+            frontier = newFrontier;
+        };
+
+        return distancesFromCell;
     }
 }
 

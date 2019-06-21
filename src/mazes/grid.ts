@@ -1,9 +1,12 @@
 import {Cell} from "./cell";
 import {getRandomArbitrary} from "../utilities/random";
+import {Distances} from "./distances";
 
 class Grid {
     public rows: number;
     public columns: number;
+    public distances: Distances;
+    public breadCrumbs: Distances
     readonly grid: Array<Array<Cell>>;
 
     constructor({rows, columns}: { rows: number, columns: number }) {
@@ -11,6 +14,11 @@ class Grid {
         this.columns = columns;
         this.grid = this.prepareGrid();
         this.configureCells();
+    }
+
+    public createDistances() {
+        this.distances = this.grid[0][0].distances();
+        this.breadCrumbs = this.distances.pathTo(this.grid[this.rows-1][0])
     }
 
     /**
@@ -79,7 +87,7 @@ class Grid {
     /**
      * Iterates over each row of cells within the grid
      */
-    protected* getRows() {
+    public* getRows() {
         for (let row of this.grid)
             yield row;
     }

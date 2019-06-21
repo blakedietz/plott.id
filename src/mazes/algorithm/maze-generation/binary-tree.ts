@@ -1,5 +1,5 @@
-import {Grid} from "../grid";
-import {sample} from "../../utilities/random";
+import {Grid} from "../../grid";
+import {sample} from "../../../utilities/random";
 
 export function binaryTree(grid: Grid) {
     let neighbors;
@@ -20,6 +20,8 @@ export function binaryTree(grid: Grid) {
             cell.link(neighbor)
         }
     }
+
+    grid.createDistances();
 
     return grid;
 }

@@ -54,4 +54,18 @@ describe("cell.ts", () => {
 
         expect(Object.keys(cell.neighbors()).length).toBe(0);
     });
+
+    test("distances", () => {
+        const cell1 = new Cell({row: 0, column: 0});
+        const cell2 = new Cell({row:0, column: 1});
+        const cell3 = new Cell({row:0, column: 2});
+        cell1.link(cell2);
+        cell2.link(cell3);
+
+        const distances = cell1.distances();
+
+        expect(distances.getCellDistance(cell1)).toEqual(0);
+        expect(distances.getCellDistance(cell2)).toEqual(1);
+        expect(distances.getCellDistance(cell3)).toEqual(2);
+    });
 });

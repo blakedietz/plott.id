@@ -3,11 +3,13 @@ import {Cell as CellModel} from "../cell";
 import {Cell, CELL_DIRECTION} from "./cell";
 import * as d3 from "d3";
 import {ISquare} from "./cell";
+import {IMazeDebugState} from "../mazes.store";
 
 interface IMazeProps {
     grid: GridModel;
     width: number;
     height: number;
+    debug: IMazeDebugState
 };
 
 const convertCellToPoints = (xScale, yScale) => (cell: CellModel): ISquare => {
@@ -19,6 +21,7 @@ const convertCellToPoints = (xScale, yScale) => (cell: CellModel): ISquare => {
     };
     return points;
 };
+
 const getPassages = (cell) => {
     const neighbors = [];
 
@@ -38,12 +41,11 @@ const getPassages = (cell) => {
     return neighbors;
 };
 
-const Maze = ({grid, width, height}: IMazeProps) => {
+const Maze = ({grid, width, height, debug: {displaySolutionDistances, displayDistancesFromRoot}}: IMazeProps) => {
     const {rows, columns} = grid;
-
     /*
-     rows and columns have + 1 added because that is the numbe of unique points in the cell grid for the corners
-     of all the cells
+     * Rows and columns have + 1 added because that is the number of unique points in the cell grid for the corners
+     * of all the cells
      */
     const xScale = d3.scaleLinear()
         .domain([0, columns])
@@ -69,6 +71,30 @@ const Maze = ({grid, width, height}: IMazeProps) => {
         >
             {cells.map(({cellPoints, cell, cellPassages}) => {
                 return <Cell cellPoints={cellPoints} cellPassages={cellPassages} cell={cell}/>;
+            })}
+            {grid.distances && displayDistancesFromRoot && cells.map(({cellPoints, cell, cellPassages}) => {
+                const {
+                    northWestCorner,
+                    northEastCorner,
+                    southWestCorner,
+                } = cellPoints;
+                const midX = northWestCorner.x - ((northWestCorner.x - northEastCorner.x)/2);
+                const midY = northEastCorner.y - ((northWestCorner.y - southWestCorner.y)/2);
+                const distance = grid.distances.getCellDistance(cell);
+
+                return <text textAnchor="middle" x={midX} y={midY} fontSize="5">{distance}</text>
+            })}
+            {grid.distances && displaySolutionDistances && cells.map(({cellPoints, cell, cellPassages}) => {
+                const {
+                    northWestCorner,
+                    northEastCorner,
+                    southWestCorner,
+                } = cellPoints;
+                const midX = northWestCorner.x - ((northWestCorner.x - northEastCorner.x)/2);
+                const midY = northEastCorner.y - ((northWestCorner.y - southWestCorner.y)/2);
+                const breadCrumb = grid.breadCrumbs.getCellDistance(cell);
+
+                return <text fill="red" textAnchor="middle" x={midX} y={midY} fontSize="5">{breadCrumb}</text>
             })}
         </svg>
     );
