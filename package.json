@@ -19,7 +19,7 @@
     "@material-ui/lab": "^3.0.0-alpha.30",
     "@zeit/next-typescript": "^1.1.1",
     "@zeit/next-workers": "^1.0.0",
-    "d3": "^5.9.2",
+    "d3": "^7.6.1",
     "jss": "latest",
     "next": "latest",
     "prop-types": "latest",
